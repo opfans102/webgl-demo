@@ -67,11 +67,11 @@ export default function Layout() {
                     if(data._angle > 0){
                         let p = 400 * data._angle /  Math.PI ;
                         moveToX = p - 10;
-                        moveToY = -p;
+                        moveToY = -p - 20;
                     }else if(data._angle < 0){
                         let p = 0 - 400 * data._angle /  Math.PI ;
                         moveToX = 0 - p - 30;
-                        moveToY = p + 40
+                        moveToY = p + 20
                     }
                     ctx.drawImage(img, data.toX + moveToX, data.toY + moveToY, 50 * data.toScale, 50 * data.toScale);
                     ctx.restore()
