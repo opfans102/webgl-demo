@@ -1,8 +1,10 @@
+import LayoutsHelper from './layoutsHelper'
+
 var layout = {
     x: 0,
     y: 0,
-    width: 25,
-    height: 25,
+    width: 50,
+    height: 50,
     scale: 1,
     angle: 0
 };
@@ -227,8 +229,9 @@ export default {
             }
         }
 
-        //console.log('perticles');
-        //console.log(perticles);
+        console.log('perticles1');
+        console.log(perticles);
+        LayoutsHelper.fixLayouts(perticles,rad);
 
         return perticles;
         //LayoutsHelper.fixLayouts(perticles, 0);
@@ -449,13 +452,14 @@ export default {
             if (i + 1 > layouts.length) i = 0;
         }
 
-        console.log('perticles');
+        LayoutsHelper.fixLayouts(perticles,rad);
+
+        console.log('perticles2');
         console.log(perticles);
 
         return perticles;
 
         //LayoutsHelper.debugDrawPalette(divX,divY,palette);
-        //LayoutsHelper.fixLayouts(perticles,rad);
     },
 
     generateLayout() {
@@ -500,8 +504,8 @@ function createPerticles(layout, pid, ax, ay, ascale, aangle) {
 
 
     po.willDelete = false;
-    po.toX = 512;
-    po.toY = 512;
+    po.toX = 50;
+    po.toY = 50;
     po.toScale = 1;
     po.toAngle = 0;
 

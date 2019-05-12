@@ -1,6 +1,6 @@
 export default {
-    IMAGE_WIDTH: 400,
-    IMAGE_HEIGHT: 400,
+    IMAGE_WIDTH: 200,
+    IMAGE_HEIGHT: 200,
     addPerticleObject(perticles, layouts, pid, ax, ay, ascale, aangle) {
         var j;
         var found;
@@ -80,7 +80,7 @@ export default {
         w = maxX - minX;
         h = maxY - minY;
 
-        var MaxW = this.IMAGE_WIDTH - 200;
+        var MaxW = this.IMAGE_WIDTH - 20;
         var MaxH = this.IMAGE_HEIGHT;
 
         if (MaxH / h < MaxW / w) {

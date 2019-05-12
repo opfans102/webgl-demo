@@ -11,6 +11,7 @@ export default function Layout() {
     const canvasRef = useRef();
     const {width, height} = useContext(CanvasContext);
 
+
     useEffect(() => {
         layoutPericleGenelator2.init();
         //start();
@@ -59,8 +60,20 @@ export default function Layout() {
                 let res = layoutPericleGenelator2.generateLayout();
                 res.forEach(data=>{
                     ctx.save();
-                    ctx.rotate(data._angle)
-                    ctx.drawImage(img, data._x, data._y, 50 * data._scale, 25 * data._scale);
+                    ctx.rotate(data._angle);
+                    let moveToX = 0;
+                    let moveToY = 0;
+
+                    if(data._angle > 0){
+                        let p = 400 * data._angle /  Math.PI ;
+                        moveToX = p - 10;
+                        moveToY = -p;
+                    }else if(data._angle < 0){
+                        let p = 0 - 400 * data._angle /  Math.PI ;
+                        moveToX = 0 - p - 30;
+                        moveToY = p + 40
+                    }
+                    ctx.drawImage(img, data.toX + moveToX, data.toY + moveToY, 50 * data.toScale, 50 * data.toScale);
                     ctx.restore()
                 })
             }
