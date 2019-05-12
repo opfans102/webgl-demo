@@ -100,7 +100,6 @@ package utme.views.main.stage3d.helpers.AutoLayout
 
 			accScale+= springiness * ( - (_scale-toScale));
 			accAngle+= springiness * ( - (_angle-toAngle));
-			
 						
 		}
 	}

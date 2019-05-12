@@ -1,7 +1,42 @@
 export default {
-    maxY: 8, //Y轴网格数
-    maxX: 8, //Y轴网格数
+    step: 0,
+    baseY: 3,
+    nW: 70,
+    nH: 70,
+    baseX: 3,
+    maxY: 3, //Y轴网格数
+    maxX: 3, //Y轴网格数
+    baseWidth: 70,
+    baseHeight: 70,
+
+    init: function () {
+        this.step = 0;
+        this.baseY = 3;
+        this.nW = 70;
+        this.nH = 70;
+        this.baseX = 3;
+        this.maxY = 3; //Y轴网格数
+        this.maxX = 3; //Y轴网格数
+        this.baseWidth = 70;
+        this.baseHeight = 70;
+    },
+
     generateLayout1: function () {
+
+        this.step = this.step + 0.1;
+        let _step = Math.floor(this.step);
+
+        if (_step >= 4) {
+            _step = 4
+        }
+
+        this.maxX = this.baseX + _step;
+        this.maxY = this.baseY + _step;
+
+        this.baseWidth = this.nW - 10 * _step;
+        this.baseHeight = this.nH - 10 * _step;
+
+
         var xW = 0, yH = 0, xArr = [], yArr = []
 
         this.getRandomY(yH, yArr, 2, this.maxY);
@@ -48,8 +83,8 @@ export default {
     generatePosition(xLineArr) {
         var top = 0;
         var left = 0;
-        var baseWidth = 30;
-        var baseHeight = 30;
+        var baseWidth = this.baseWidth;
+        var baseHeight = this.baseHeight;
         var margin = 2;
         var arrayList = [];
 

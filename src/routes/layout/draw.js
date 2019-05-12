@@ -1,5 +1,7 @@
 import layoutPericleGenelator from './auto-layout/layout-pericle-genelator'
 
+import layoutPericleGenelator3 from './auto-layout/layout-pericle-genelator3'
+
 export default {
     ctx: null,
     imgArr: [],
@@ -19,6 +21,45 @@ export default {
         console.log('imgList ' + JSON.stringify(imgList))
         this.drawImageAnimation(imgArr.rotate, imgList)
     },
+
+    drawluqaing(){
+        var result = layoutPericleGenelator3.generate(300,300);
+
+        var  arr = []
+        result.forEach((ii,i)=>{
+            ii.forEach((singal,j)=>{
+                singal.left = singal.x;
+                singal.top = singal.y;
+
+                if (i === 0 || i === (result.length - 1)) {
+                    if (j > 1 || j < (ii.length - 2)) {
+                        singal.show = Math.floor(Math.random() * 2);
+                    } else {
+                        singal.show = 1;
+                    }
+                } else {
+                    if (j < 1 || j > (ii.length - 2)) {
+                        singal.show = Math.floor(Math.random() * 2);
+                    } else {
+                        singal.show = 1;
+                    }
+                }
+                arr.push(singal)
+            })
+        });
+
+        var imgArr = {
+            rotate: 0,
+            images: arr
+        }
+        this.ctx.clearRect(0, 0, 600, 600);
+        // 内存中先加载，然后当内存加载完毕时，再把内存中的数据填充到我们的 dom元素中，这样能够快速的去
+        let imgList = imgArr.images;
+        this.setAnimation(imgList);
+        console.log('imgList ' + JSON.stringify(imgList))
+        this.drawImageAnimation(imgArr.rotate, imgList)
+    },
+
     onlyDraw() {
         var bitmap = layoutPericleGenelator.generateLayout1();
         var imgArr = bitmap.images;
