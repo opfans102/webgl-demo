@@ -1,6 +1,5 @@
-import layoutPericleGenelator from './auto-layout/layout-pericle-genelator'
-
-import layoutPericleGenelator3 from './auto-layout/layout-pericle-genelator3'
+import layoutPericleGenelator from './layout-pericle-genelator';
+import layoutsHelper from './layoutsHelper';
 
 export default {
     ctx: null,

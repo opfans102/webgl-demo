@@ -1,139 +1,165 @@
-import React, {useContext, useEffect, useRef} from 'react';
-import CanvasContext from '../../context/CanvasContext';
+import React from "react"
+
 import './draw.css';
 import imgIcon from './images/template.jpeg'
-import drawHandler from './draw.js'
-import layoutPericleGenelator from './auto-layout/layout-pericle-genelator';
-import layoutPericleGenelator2 from './auto-layout/layout-pericle-genelator2';
-import layoutPericleGenelator3 from './auto-layout/layout-pericle-genelator3';
 
-export default function Layout() {
-    const canvasRef = useRef();
-    const {width, height} = useContext(CanvasContext);
+import draw2 from './auto-layout/algorithm-2/draw'
 
-
-    useEffect(() => {
-        layoutPericleGenelator2.init();
-        //start();
-        test();
-    }, [canvasRef, width, height]);
-
-    function algorithm1() {
-        const {current} = canvasRef;
-        if (current) {
-            let ctx = current.getContext('2d');
-            ctx.clearRect(0, 0, 600, 600);
-            console.log(ctx);
-            let img = new Image();
-            img.src = imgIcon;
-            img.onload = function () {
-                layoutPericleGenelator.init();
-                drawHandler.init(ctx, [img]);
-            }
+export default class Layout extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            srcType: 'square',
+            currentTab: 'algorithm3',
+            weakMode: false,
+            tabs: [
+                {
+                    code: 'algorithm1',
+                    name: "算法1",
+                    selected: false
+                },
+                {
+                    code: 'algorithm2',
+                    name: "算法2",
+                    selected: false
+                },
+                {
+                    code: 'algorithm3',
+                    name: "算法3",
+                    selected: true
+                }
+            ]
         }
+        this.canvasWidth = 300;
+        this.canvasHeight = 400;
+        this.canvas = null;
+        this.text = 'hand';
+        this.imgArray = [];
     }
 
-    function algorithm2() {
-        const {current} = canvasRef;
-        if (current) {
-            let ctx = current.getContext('2d');
-            ctx.clearRect(0, 0, 600, 600);
-            console.log(ctx);
-            let img = new Image();
-            img.src = imgIcon;
-            img.onload = function () {
-                drawHandler.init(ctx, [img]);
-                drawHandler.drawluqaing();
-            }
+    canvasRef = (canvas) => {
+        if (canvas) {
+            this.canvas = canvas;
+            this.width = canvas.width;
+            this.height = canvas.height;
         }
+    };
+
+    componentDidMount() {
+        this.resetAlgorithm3(this.state.srcType);
+    };
+
+    loadImg(type) {
+        let img = new Image();
+        img.src = imgIcon;
+        img.onload = () => {
+            console.log('loadImg img.width ' + img.width);
+            console.log('loadImg img.height ' + img.height);
+            let width = img.width, height = img.height;
+            if(type === 'square'){
+                height = width;
+            }else{
+                height = width/5;
+            }
+            this.imgArray.push({
+                image: img,
+                width: width,
+                height: height
+            })
+        }
+    };
+
+    changeAlgorithm(tab) {
+    };
+
+    draw(){
+        draw2.draw();
     }
 
-    function test() {
-        const {current} = canvasRef;
-        if (current) {
-            let ctx = current.getContext('2d');
-            ctx.clearRect(0, 0, 600, 600);
-            let img = new Image();
-            img.src = imgIcon;
-            img.onload = function () {
+    reset() {
+        this.resetAlgorithm3('square');
+    };
 
-                let res = layoutPericleGenelator2.generateLayout();
-                res.forEach(data=>{
-                    ctx.save();
-                    ctx.rotate(data._angle);
-                    let moveToX = 0;
-                    let moveToY = 0;
+    changePic(type) {
+        this.setState({srcType: type});
+        this.resetAlgorithm3(type)
+    };
 
-                    if(data._angle > 0){
-                        let p = 400 * data._angle /  Math.PI ;
-                        moveToX = p - 10;
-                        moveToY = -p - 20;
-                    }else if(data._angle < 0){
-                        let p = 0 - 400 * data._angle /  Math.PI ;
-                        moveToX = 0 - p - 30;
-                        moveToY = p + 20
+    resetAlgorithm3(type) {
+        this.imgArray = [];
+        this.loadImg(type);
+        let ctx = this.canvas.getContext('2d');
+        setTimeout(()=>{
+            let ctx = this.canvas.getContext('2d');
+            draw2.init(ctx,this.imgArray,this.state.weakMode,300,300,0.95);
+        },200)
+    };
+
+    render() {
+        const tabs = this.state.tabs, weakMode = this.state.weakMode;
+        return (
+            <div>
+                <div>多张图一起布局和字体布局还在调试中</div>
+                <div className="tabs">
+                    {
+                        tabs.map(data =>
+                            (<div className={`tab ${ data.selected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                      this.changeAlgorithm(data)
+                                  }}>{data.name}</div>)
+                        )
                     }
-                    ctx.drawImage(img, data.toX + moveToX, data.toY + moveToY, 50 * data.toScale, 50 * data.toScale);
-                    ctx.restore()
-                })
-            }
-        }
-    }
-
-    function change() {
-        drawHandler.draw();
-    }
-
-    function reset1() {
-        algorithm1();
-        layoutPericleGenelator.init();
-    }
-
-    function reset2() {
-        algorithm2();
-        layoutPericleGenelator.init();
-    }
-
-    return (
-        <div>
-            <div className="buttons">
-                <div className="auto-layout-button primary" onClick={() => {
-                    change()
-                }}>算法1
                 </div>
-                <div className="auto-layout-button primary" onClick={() => {
-                    algorithm2()
-                }}>算法2
+
+                <div className="buttons">
+                    <div className="auto-layout-button primary"
+                         onClick={() => {
+                             this.draw();
+                         }}>变换
+                    </div>
+                    <div className="auto-layout-button"
+                         onClick={() => {
+                             this.reset();
+                         }}>重置
+                    </div>
                 </div>
-                <div className="auto-layout-button primary" onClick={() => {
-                    test()
-                }}>算法3test
-                </div>
-                <div className="auto-layout-button" onClick={() => {
-                    reset1();
-                }}>重置算法1
-                </div>
-                <div className="auto-layout-button" onClick={() => {
-                    reset1();
-                }}>重置算法2
+
+                <canvas className='auto-layout' ref={this.canvasRef} width={this.canvasWidth}
+                        height={this.canvasHeight}/>
+
+                <div className="buttons">
+                    <div className="auto-layout-button primary"
+                         onClick={() => {
+                             this.changePic('square');
+                         }}>等边图片
+                    </div>
+                    <div className="auto-layout-button primary"
+                         onClick={() => {
+                             this.changePic('react');
+                         }}>不等边图片
+                    </div>
+                    <div className="auto-layout-button primary"
+                         onClick={() => {
+                             this.changePic('text');
+                         }}>文字
+                    </div>
+                    <div className="auto-layout-button"
+                         onClick={() => {
+                             this.setState({weakMode: !this.state.weakMode});
+                             this.reset();
+                         }}>{weakMode ? ('随机：弱化模式') : ('随机性：强化处理')}
+                    </div>
+
+                    <div className="auto-layout-button">摇动幅度参数： 0.98
+                    </div>
                 </div>
             </div>
-            <canvas className='auto-layout' ref={canvasRef} width={width} height={height}/>
-
-            <div className="buttons">
-                <div className="auto-layout-button primary" onClick={() => {
-                    //change()
-                }}>设置等边图片
-                </div>
-                <div className="auto-layout-button primary" onClick={() => {
-                    //change()
-                }}>设置不等边图片
-                </div>
-                <div className="auto-layout-button primary" onClick={() => {
-                    //change()
-                }}>设置文字
-                </div>
-            </div>
-        </div>
-    );
+        )
+    }
 }
+
+
+
+
+
+

@@ -1,6 +1,7 @@
 import LayoutsHelper from './layoutsHelper'
 
-var layout = {
+//图片的信息
+let layout = {
     x: 0,
     y: 0,
     width: 50,
@@ -11,21 +12,19 @@ var layout = {
 
 export default {
     _step: 0,
-    flag : false,
+    flag: false,
     layouts: null,
     perticles: null,
-    init() {
+    weakMode: false,
+    init(layouts, weakMode = false) {
+        this.weakMode = weakMode;
         this._step = 0;
         this.flag = false;
-        this.layouts = [layout];
-        this.perticles = [createPerticles(layout, 0, 0, 0, 1, 0)];
+        this.layouts = layouts;
+        this.perticles = [];
     },
+    //
     addPerticleObject(perticles, layouts, pid, ax, ay, ascale, aangle) {
-
-        /*console.log('addPerticleObject.x ' + ax);
-        console.log('y ' + ay);
-        console.log('scale ' + ascale);*/
-
         var j;
         var found;
         var po;
@@ -44,6 +43,7 @@ export default {
         po.willDelete = false;
         if (!found) perticles.push(po);
     },
+    //创建规则形态的布局
     generatePictLayouts(perticles, layouts) {
         var marginX;
         var iStep;
@@ -95,11 +95,16 @@ export default {
             }
         }
         //trace("LAYOUT STAGE INFO:",divX,divY,mw,mh);
+        //divX = 2;
+        //divY = 3;
+        //for (i = 0; i < 6; i++) palette.push(0);
         for (i = 0; i < divX * divY; i++) palette.push(0);
 
         console.log('palette ' + JSON.stringify(palette));
 
         marginX = Math.max(divX * mw, divY * mh) * 0.02;
+
+        console.log('marginX ' + marginX)
 
         rad = Math.random() * Math.PI * .5 - Math.PI * 0.25;
         if (Math.abs(rad / Math.PI * 180) < 15) rad = 0;
@@ -170,15 +175,31 @@ export default {
                 return;
             }
 
+            console.log(`posX + ${posX} posY + ${posY} size + ${size} Math.round(size) + ${Math.round(size)}`);
+            console.log('posY ' + posY);
+
+            //源代码处理边界地方好像有bug，会有突出的块
+            size = Math.round(size);
+
+            if (size > (divX - posX)) {
+                size = (divX - posX);
+            }
+            if (size > (divY - posY)) {
+                size = (divY - posY)
+            }
+            //处理结束
 
             for (yi = posY; yi < posY + size; yi++) {
                 for (xi = posX; xi < posX + size; xi++) {
-                    palette[yi * divX + xi] = 1;
+                    if (xi < divX) {
+                        palette[yi * divX + xi] = 1;
+                    }
                 }
             }
             scale = size * defaultScale;
-            x = posX * mw + mw * scale * .5;
-            y = posY * mh + mh * scale * .5;
+
+            x = posX * mw + mw * defaultScale * .5;  //源代码这里好像有bug
+            y = posY * mh + mh * defaultScale * .5;
 
             {
                 if (lo.width / (mw * scale) > lo.height / (mh * scale)) {
@@ -189,6 +210,7 @@ export default {
                     scale *= (lo.height * scale - marginX) / (lo.height * scale);
                 }
             }
+            console.log('digui loop x,y' + x + ' ' + y + '' + scale);
             _self.addPerticleObject(perticles, layouts, i, x, y, scale, rad);
 
             i++;
@@ -221,6 +243,7 @@ export default {
                     //console.log('x ' + x);
                     //console.log('y ' + y);
                     //console.log('scale ' + scale);
+                    console.log('loop x,y' + x + ' ' + y);
                     this.addPerticleObject(perticles, layouts, i, x, y, scale, rad);
 
                     i++;
@@ -229,9 +252,21 @@ export default {
             }
         }
 
-        console.log('perticles1');
-        console.log(perticles);
-        LayoutsHelper.fixLayouts(perticles,rad);
+        //console.log('divX ' + divX);
+        //console.log('divY ' + divY);
+        //console.log('palette ' + JSON.stringify(palette));
+        //调试用输出矩阵布局
+        for (yi = 0; yi < divY; yi++) {
+            let divXStr = yi < 10 ? ' ' + yi + ' : ' : yi + ' : ';
+            for (xi = 0; xi < divX; xi++) {
+                divXStr = divXStr + palette[yi * divX + xi] + ','
+            }
+            //console.log(divXStr)
+        }
+
+        //console.log('perticles1');
+        //console.log(perticles);
+        LayoutsHelper.fixLayouts(perticles, rad);
 
         return perticles;
         //LayoutsHelper.fixLayouts(perticles, 0);
@@ -240,6 +275,7 @@ export default {
         //console.log(perticles);
     },
 
+    //创建不规则的布局-一个图像
     generatePictLayouts2Single(perticles, layouts) {
         var i;
         var t;
@@ -300,8 +336,14 @@ export default {
         var iaspect = Math.max(1, Math.round(widM ? mw / mh : mh / mw));
         //	trace(aspect,iaspect);
 
+        console.log(iaspect);
+
         divX = Math.max(20 + (40 * 1.5 - 20) * this._step, widM ? 8 * iaspect : 0);
         divY = Math.max(25 + (50 * 1.5 - 20) * this._step, widM ? 0 : 8 * iaspect);
+
+        divX = Math.round(divX);
+        divY = Math.round(divY);
+
         MAX_WIDTH = divX * 10;
         MAX_HEIGHT = divY * 10;
 
@@ -312,6 +354,8 @@ export default {
 
         console.log(rad);
         for (i = 0; i < divX * divY; i++) palette.push(0);
+
+        //console.log('palette ' + JSON.stringify(palette));
 
 
         i = Math.floor(Math.random() * layouts.length);
@@ -334,8 +378,8 @@ export default {
                     numH = numW * iaspect;
                 }
                 scale = MAX_HEIGHT / Number(divY) * numH / lo.height;
-                posX = (divX - numW) * .5;
-                posY = (divY - numH) * .5;
+                posX = Math.round((divX - numW) * .5);
+                posY = Math.round((divY - numH) * .5);
                 size = 2;
             } else {
                 numH = 0;
@@ -362,7 +406,7 @@ export default {
                 {
                     //RE_CHECK:
 
-                    function reCheck(){
+                    function reCheck() {
 
                         let status = 'OK';
 
@@ -372,30 +416,33 @@ export default {
                         checkTimes++;
                         if (checkTimes > 500) {
                             //trace("NOT FOUND")
-                            status = 'END';
-                            return;
+                            return 'END';
                             //continue;
                         }
                         for (y = posY; y < posY + numH; y++) {
-                            if(status === 'OK'){
+                            if (status === 'OK') {
                                 for (x = posX; x < posX + numW; x++) {
-                                    if(status === 'OK'){
+                                    if (status === 'OK') {
                                         if (palette[y * divX + x]) {
                                             //goto RE_CHECK;
                                             status = 'RECHECK';
                                         }
                                     }
+                                    else {
+                                        break
+                                    }
                                 }
+                            } else {
+                                break;
                             }
                         }
 
-                        if(status === 'OK'){
+                        if (status === 'OK') {
 
-                        }else if(status == 'RECHECK'){
-                            reCheck();
-                            return;
-                        }else{
-                            return;
+                        } else if (status == 'RECHECK') {
+                            return reCheck();
+                        } else {
+                            return status;
                         }
                         kaburiNum = 0;
 
@@ -420,13 +467,18 @@ export default {
                                     kaburiNum++;
                                 }
                             }
-                        if (kaburiNum < 2) reCheck();
+                        if (kaburiNum < 2) {
+                            return reCheck();
+                        }
 
-                        return ;
+                        return status;
                     }
 
-                    reCheck();
-
+                    let status = reCheck();
+                    console.log('end status' + status);
+                    if (status === 'END') {
+                        continue;
+                    }
 
                 }
             }
@@ -434,28 +486,46 @@ export default {
             //パレットにマーキング
             for (yi = posY; yi < posY + numH; yi++) {
                 for (xi = posX; xi < posX + numW; xi++) {
-                    palette[yi * divX + xi] = 1;
+                    if (xi < divX) {  //源代码处理边界地方好像有bug
+                        palette[yi * divX + xi] = 1;
+                    }
                 }
             }
 
+            console.log(`posX: ${posX} posY: ${posY} numW: ${numW} numH: ${numH} `)
+
             marginX = 3;
 
-            y = posY * 10 + numH * 10 * .5;
-            x = (posX * 10 + numW * 10 * .5) * aspect * (widM ? 1.0 / Number(iaspect) : iaspect);
+            y = posY * 10;
+            x = (posX * 10) * aspect * (widM ? 1.0 / Number(iaspect) : iaspect);
             //x=(posX+numW)/Number(divX)*MAX_WIDTH-lo.width*0.5*scale-marginX*.5;
             scale *= (lo.height * scale - marginX) / (lo.height * scale);//margin for Y
 
             angle = 0;
+            console.log('2 loop x,y' + x + ' ' + y + '' + scale);
             this.addPerticleObject(perticles, layouts, i, x, y, scale, rad);
 
             i++;
             if (i + 1 > layouts.length) i = 0;
         }
 
-        LayoutsHelper.fixLayouts(perticles,rad);
+        //console.log('divX ' + divX);
+        //console.log('divY ' + divY);
+        //console.log('palette ' + JSON.stringify(palette));
+        //console.log('palette.length ' + palette.length);
 
-        console.log('perticles2');
-        console.log(perticles);
+        for (yi = 0; yi < divY; yi++) {
+            let divXStr = yi < 10 ? ' ' + yi + ' : ' : yi + ' : ';
+            for (xi = 0; xi < divX; xi++) {
+                divXStr = divXStr + palette[yi * divX + xi] + ','
+            }
+            //console.log(divXStr)
+        }
+
+        LayoutsHelper.fixLayouts(perticles, rad);
+
+        //console.log('perticles2');
+        //console.log(perticles);
 
         return perticles;
 
@@ -465,6 +535,7 @@ export default {
     generateLayout() {
         this._step += 0.015 * 0.2;
         if (this._step > 1.0) this._step = 1.0;
+        if (this.weakMode && this._step > 0.05) this._step = 0.05;
 
         let num = this.perticles.length;
         for (var i = 0; i < num;) {
@@ -480,9 +551,9 @@ export default {
         this.perticles = [];
 
         let res;
-        if(this.flag){
+        if (this.flag) {
             res = this.generatePictLayouts2Single(this.perticles, this.layouts);
-        }else{
+        } else {
             res = this.generatePictLayouts(this.perticles, this.layouts);
         }
 
@@ -491,11 +562,8 @@ export default {
     }
 }
 
-
+//创建布局
 function createPerticles(layout, pid, ax, ay, ascale, aangle) {
-
-    console.log('createPerticles aangle ' + aangle)
-
     var po = {};
     po._scale = 0;
     po._angle = 0;
